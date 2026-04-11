@@ -1,0 +1,22 @@
+name: Validação de CLP Automacional
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  validate-xml:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout do Repositório
+      uses: actions/checkout@v4
+
+    - name: Verificar se L5X é válido e íntegro
+      run: |
+        echo "Monitorando estrutura do L5X exportado do Studio 5000..."
+        # Utilitário famoso em Linux que checa se o XML está faltando tags de fechamento
+        xmllint --noout SMD_Application.L5X 
+        echo "Lógica do LADDER perfeitamente arquivada e válida!"
