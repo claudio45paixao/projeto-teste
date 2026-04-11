@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RSLogix5000Content SchemaRevision="1.0" SoftwareRevision="38.00" TargetName="SMD_Application" TargetType="Program" ContainsContext="true" ExportDate="Sat Apr 11 19:57:28 2026" ExportOptions="References NoRawData L5KData DecoratedData Context Dependencies ForceProtectedEncoding AllProjDocTrans">
+<Controller Use="Context" Name="projetosmd">
+<Programs Use="Context">
+<Program Use="Target" Name="SMD_Application" TestEdits="false" MainRoutineName="MainRoutine" Disabled="false" UseAsFolder="false">
+<Description><![CDATA[Programa principal da maquina aplicadora de etiquetas. Engloba o controle de IOs fisicos, sistema de eixos com Modbus RTU/IO Discreta e interface com Desktop PC.]]></Description>
+<Tags>
+  <Tag Name="readyToStart" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Endereço Excel: Area de Bits (0). Maquina sem alarmes, cartoes OK e portas fechadas; lido pelo SCADA Desktop.]]></Description>
+  </Tag>
+  <Tag Name="startOperation" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Endereço Excel: Area de Bits (1). Botão de Start virtual enviado pelo sistema Desktop para dar inicio ao ciclo do Step 0 para 10 da maquina de estados.]]></Description>
+  </Tag>
+  <Tag Name="takeLabel" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Endereço Excel: Area de Bits (2). Comando para pegar a etiqueta. Pode ser disparado via HMI local ou maquina de estado.]]></Description>
+  </Tag>
+  <Tag Name="labelCollected" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Endereço Excel: Area de Bits (3). Flag de status que avisa o Desktop de modo assincrono que o Gripper T puxou a tag e o vácuo acusou tag presente.]]></Description>
+  </Tag>
+  <Tag Name="applyLabel" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Endereço Excel: Area de Bits (4). Comando de disparo do processo de aplicação; envia Eixo Z para o Offset Y em relação à PCB.]]></Description>
+  </Tag>
+  <Tag Name="labelApplied" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Endereço Excel: Area de Bits (5). Sensor ou maquina de estados acusa conclusao da descida do Z e alivio no vacuostato do Gripper.]]></Description>
+  </Tag>
+  <Tag Name="discardReelToRejectArea" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Endereço Excel: Area de Bits (6). O Desktop determinou via visao que o reel possui falha e precisa ser rejeitado pro Elevador de Rejeito.]]></Description>
+  </Tag>
+  
+  <Tag Name="labelApplication_X" TagType="Base" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Endereço Excel: Registradores (0). Offset do eixo Cartesiano X (em décimos de mm) recebido pelo calculo de visao do desktop.]]></Description>
+  </Tag>
+  <Tag Name="labelApplication_Y" TagType="Base" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Endereço Excel: Registradores (1). Offset do eixo Cartesiano Y (em décimos de mm) recebido pelo calculo de visao.]]></Description>
+  </Tag>
+  <Tag Name="labelApplication_Angle" TagType="Base" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Endereço Excel: Registradores (2). Rotação de correção Teta do Gripper para alinhar a SMD com a placa.]]></Description>
+  </Tag>
+  <Tag Name="reelPosition" TagType="Base" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Endereço Excel: Registradores (3). Determina posição index do Rolo (1 a 5) em execucao ativa.]]></Description>
+  </Tag>
+  
+  <Tag Name="inputArea_s1" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Entrada fisica X24 -> Planilha 2 -> Sensor do Carrinho Entrada S1, mapeado do cartao para essa variavel em R00_IO_Mapping.]]></Description>
+  </Tag>
+  <Tag Name="doorOpened" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Chave magnetica/intertravamento físico da porta (NR12). Se verdadeiro (True), bloqueia o acionamento de todos os servos e avisa a master readyToStart=false.]]></Description>
+  </Tag>
+
+  <Tag Name="liftInputTargetPosition_pulses" TagType="Base" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Registradores Modbus 3202 e 3203. Combinação em DINT determinando o Target Position pra instrução Modbus RTU (Elevador do Modbus ID=3).]]></Description>
+  </Tag>
+  <Tag Name="liftInputGoToPosition" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Registrador Modbus 2040. Executa o Trigger de posicionamento, dispara mensagem Write.]]></Description>
+  </Tag>
+
+  <Tag Name="applyLabelAxis_svon" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Pino de Saida Fisico (A13 do conector CN5). Serve para ligar o Servo.]]></Description>
+  </Tag>
+  <Tag Name="applyLabelAxis_drive" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Pino Saida Fisico (A11). Dispara eixo Z para a posição.]]></Description>
+  </Tag>
+  <Tag Name="applyLabelAxis_setup" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Pino Saida Fisico (A9). Comando Origin.]]></Description>
+  </Tag>
+  <Tag Name="applyLabelAxis_busy" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Pino Entrada Fisica (B7). Retorna 1 enquanto o pino Z está em translação.]]></Description>
+  </Tag>
+  <Tag Name="applyLabelAxis_svre" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Pino Entrada Fisica (B11). Confirmação de Servo Ready.]]></Description>
+  </Tag>
+  <Tag Name="applyLabelAxis_inp" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Pino Entrada Fisica (B10). IN-POSITION. Está no alvo.]]></Description>
+  </Tag>
+  <Tag Name="applyLabelAxis_alarm" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Pino Entrada Fisica (B13). Alarme.]]></Description>
+  </Tag>
+
+  <Tag Name="Machine_State" TagType="Base" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[Registro Sequenciador Grafcet.]]></Description>
+  </Tag>
+</Tags>
+<Routines>
+  <Routine Name="MainRoutine" Type="RLL">
+    <Description><![CDATA[A RLL Continua Base. Concentra a arquitetura base de varredura do CLP.]]></Description>
+    <RLLContent>
+      <Rung Number="0" Type="N">
+        <Comment><![CDATA[PASSO 1: Mapeamento Fisico das DI/DOs.]]></Comment>
+        <Text><![CDATA[JSR(R00_IO_Mapping,0);]]></Text>
+      </Rung>
+      <Rung Number="1" Type="N">
+        <Comment><![CDATA[PASSO 2: Interface ModbusTCP Desktop.]]></Comment>
+        <Text><![CDATA[JSR(R01_Desktop_Interface,0);]]></Text>
+      </Rung>
+      <Rung Number="2" Type="N">
+        <Comment><![CDATA[PASSO 3: Logica Modbus RTU dos elevadores.]]></Comment>
+        <Text><![CDATA[JSR(R02_Elevators_ModbusRTU,0);]]></Text>
+      </Rung>
+      <Rung Number="3" Type="N">
+        <Comment><![CDATA[PASSO 4: Driver de Eixos Customizado para IAI/SMC.]]></Comment>
+        <Text><![CDATA[JSR(R03_Servos_Discretos,0);]]></Text>
+      </Rung>
+      <Rung Number="4" Type="N">
+        <Comment><![CDATA[PASSO FINAL: Maquina de Estados.]]></Comment>
+        <Text><![CDATA[JSR(R10_Main_State_Machine,0);]]></Text>
+      </Rung>
+    </RLLContent>
+  </Routine>
+  <Routine Name="R00_IO_Mapping" Type="RLL">
+    <RLLContent>
+      <Rung Number="0" Type="N"><Text><![CDATA[XIC(Local:3:I.Pt00.Data)OTE(inputArea_s1);]]></Text></Rung>
+      <Rung Number="1" Type="N"><Text><![CDATA[XIC(Local:4:I.Pt07.Data)OTE(applyLabelAxis_busy);]]></Text></Rung>
+      <Rung Number="2" Type="N"><Text><![CDATA[XIC(Local:4:I.Pt10.Data)OTE(applyLabelAxis_inp);]]></Text></Rung>
+      <Rung Number="3" Type="N"><Text><![CDATA[XIC(applyLabelAxis_svon)OTE(Local:6:O.Pt13.Data);]]></Text></Rung>
+      <Rung Number="4" Type="N"><Text><![CDATA[XIC(applyLabelAxis_drive)OTE(Local:6:O.Pt11.Data);]]></Text></Rung>
+    </RLLContent>
+  </Routine>
+  <Routine Name="R01_Desktop_Interface" Type="RLL">
+    <RLLContent>
+      <Rung Number="0" Type="N"><Text><![CDATA[XIC(inputArea_s1)XIO(doorOpened)OTE(readyToStart);]]></Text></Rung>
+    </RLLContent>
+  </Routine>
+  <Routine Name="R02_Elevators_ModbusRTU" Type="RLL">
+    <RLLContent>
+      <Rung Number="0" Type="N"><Text><![CDATA[XIC(liftInputGoToPosition)NOP();]]></Text></Rung>
+    </RLLContent>
+  </Routine>
+  <Routine Name="R03_Servos_Discretos" Type="RLL">
+    <RLLContent>
+      <Rung Number="0" Type="N"><Text><![CDATA[XIC(applyLabel)XIO(applyLabelAxis_alarm)XIO(applyLabelAxis_svre)OTE(applyLabelAxis_svon);]]></Text></Rung>
+      <Rung Number="1" Type="N"><Text><![CDATA[XIC(applyLabelAxis_svre)XIO(applyLabelAxis_inp)OTE(applyLabelAxis_setup);]]></Text></Rung>
+    </RLLContent>
+  </Routine>
+  <Routine Name="R10_Main_State_Machine" Type="RLL">
+    <RLLContent>
+      <Rung Number="0" Type="N"><Text><![CDATA[EQU(Machine_State,0)XIC(startOperation)XIC(readyToStart)MOV(10,Machine_State);]]></Text></Rung>
+      <Rung Number="1" Type="N"><Text><![CDATA[EQU(Machine_State,10)XIC(applyLabelAxis_inp)MOV(20,Machine_State)OTL(takeLabel);]]></Text></Rung>
+    </RLLContent>
+  </Routine>
+</Routines>
+</Program>
+</Programs>
+</Controller>
+</RSLogix5000Content>

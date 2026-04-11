@@ -1,0 +1,19 @@
+# RSLogix / Studio 5000 Ignore List
+# Ignora arquivos de backup gerados estaticamente
+*.ACD.recovery
+*.bak
+*BAK*.acd
+*.sem
+*.wrk
+
+# Caso o cliente deseje ignorar binários enormes e trackear apenas L5X:
+# (Para habilitar, remova o # da linha abaixo)
+# *.ACD 
+
+# Pastas de configuração local do sistema Windows
+.vs/
+.vscode/
+
+# Extrações temporárias
+/tags_extracted/
+*.txt
