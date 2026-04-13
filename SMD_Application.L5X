@@ -79,6 +79,17 @@
   <Tag Name="Machine_State" TagType="Base" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
     <Description><![CDATA[Registro Sequenciador Grafcet.]]></Description>
   </Tag>
+
+  <!-- TAGS DE SIMULACAO - substituem I/O fisico para rodar no emulador -->
+  <Tag Name="sim_s1_input" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[[EMULACAO] Simula Local:3:I.Pt00.Data - Sensor do Carrinho Entrada S1. Force para TRUE para simular sensor ativo.]]></Description>
+  </Tag>
+  <Tag Name="sim_axis_busy" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[[EMULACAO] Simula Local:4:I.Pt07.Data - Eixo Z em translacao (BUSY). Force para TRUE enquanto simular movimento.]]></Description>
+  </Tag>
+  <Tag Name="sim_axis_inp" TagType="Base" DataType="BOOL" Radix="Decimal" ExternalAccess="Read/Write">
+    <Description><![CDATA[[EMULACAO] Simula Local:4:I.Pt10.Data - IN-POSITION do eixo Z. Force para TRUE para simular que chegou ao alvo.]]></Description>
+  </Tag>
 </Tags>
 <Routines>
   <Routine Name="MainRoutine" Type="RLL">
@@ -108,11 +119,26 @@
   </Routine>
   <Routine Name="R00_IO_Mapping" Type="RLL">
     <RLLContent>
-      <Rung Number="0" Type="N"><Text><![CDATA[XIC(Local:3:I.Pt00.Data)OTE(inputArea_s1);]]></Text></Rung>
-      <Rung Number="1" Type="N"><Text><![CDATA[XIC(Local:4:I.Pt07.Data)OTE(applyLabelAxis_busy);]]></Text></Rung>
-      <Rung Number="2" Type="N"><Text><![CDATA[XIC(Local:4:I.Pt10.Data)OTE(applyLabelAxis_inp);]]></Text></Rung>
-      <Rung Number="3" Type="N"><Text><![CDATA[XIC(applyLabelAxis_svon)OTE(Local:6:O.Pt13.Data);]]></Text></Rung>
-      <Rung Number="4" Type="N"><Text><![CDATA[XIC(applyLabelAxis_drive)OTE(Local:6:O.Pt11.Data);]]></Text></Rung>
+      <Rung Number="0" Type="N">
+        <Comment><![CDATA[[EMULACAO] Era: XIC(Local:3:I.Pt00.Data). Force sim_s1_input=TRUE para simular sensor S1 ativo.]]></Comment>
+        <Text><![CDATA[XIC(sim_s1_input)OTE(inputArea_s1);]]></Text>
+      </Rung>
+      <Rung Number="1" Type="N">
+        <Comment><![CDATA[[EMULACAO] Era: XIC(Local:4:I.Pt07.Data). Force sim_axis_busy=TRUE para simular eixo em movimento.]]></Comment>
+        <Text><![CDATA[XIC(sim_axis_busy)OTE(applyLabelAxis_busy);]]></Text>
+      </Rung>
+      <Rung Number="2" Type="N">
+        <Comment><![CDATA[[EMULACAO] Era: XIC(Local:4:I.Pt10.Data). Force sim_axis_inp=TRUE para simular IN-POSITION.]]></Comment>
+        <Text><![CDATA[XIC(sim_axis_inp)OTE(applyLabelAxis_inp);]]></Text>
+      </Rung>
+      <Rung Number="3" Type="N">
+        <Comment><![CDATA[[EMULACAO] Era: OTE(Local:6:O.Pt13.Data) - saida SVON do servo. NOP no emulador.]]></Comment>
+        <Text><![CDATA[NOP();]]></Text>
+      </Rung>
+      <Rung Number="4" Type="N">
+        <Comment><![CDATA[[EMULACAO] Era: OTE(Local:6:O.Pt11.Data) - saida DRIVE do servo. NOP no emulador.]]></Comment>
+        <Text><![CDATA[NOP();]]></Text>
+      </Rung>
     </RLLContent>
   </Routine>
   <Routine Name="R01_Desktop_Interface" Type="RLL">
@@ -133,8 +159,8 @@
   </Routine>
   <Routine Name="R10_Main_State_Machine" Type="RLL">
     <RLLContent>
-      <Rung Number="0" Type="N"><Text><![CDATA[EQU(Machine_State,0)XIC(startOperation)XIC(readyToStart)MOV(10,Machine_State);]]></Text></Rung>
-      <Rung Number="1" Type="N"><Text><![CDATA[EQU(Machine_State,10)XIC(applyLabelAxis_inp)MOV(20,Machine_State)OTL(takeLabel);]]></Text></Rung>
+      <Rung Number="0" Type="N"><Text><![CDATA[EQ(Machine_State,0)XIC(startOperation)XIC(readyToStart)MOVE(10,Machine_State);]]></Text></Rung>
+      <Rung Number="1" Type="N"><Text><![CDATA[EQ(Machine_State,10)XIC(applyLabelAxis_inp)MOVE(20,Machine_State)OTL(takeLabel);]]></Text></Rung>
     </RLLContent>
   </Routine>
 </Routines>
